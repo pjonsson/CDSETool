@@ -86,6 +86,7 @@ class Credentials:  # pylint: disable=too-few-public-methods disable=too-many-in
             or "https://identity.dataspace.copernicus.eu"
             + "/auth/realms/CDSE/.well-known/openid-configuration"
         )
+        self.__access_token_leeway = timedelta(seconds=180)
 
         self.__access_token = None
         self.__refresh_token = None
@@ -149,7 +150,9 @@ class Credentials:  # pylint: disable=too-few-public-methods disable=too-many-in
 
         self.__access_token = response["access_token"]
         self.__refresh_token = response["refresh_token"]
-        self.__access_token_expires = now + timedelta(seconds=response["expires_in"])
+        self.__access_token_expires = (
+            now + timedelta(seconds=response["expires_in"]) - self.__access_token_leeway
+        )
         self.__refresh_token_expires = now + timedelta(
             seconds=response["refresh_expires_in"]
         )
