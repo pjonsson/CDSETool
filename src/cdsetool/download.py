@@ -41,8 +41,11 @@ def download_feature(feature, path, options=None):
     with _get_monitor(options).status() as status:
         (fd, tmp) = tempfile.mkstemp()  # pylint: disable=invalid-name
         status.set_filename(filename)
-        attempts = 0
+        attempts = -1
         while attempts < 5:
+            attempts += 1
+            if attempts > 0:  # Sleep before retrying.
+                time.sleep(60 * (1 + (random.random() / 4)))
             # Always get a new session, credentials might have expired.
             try:
                 session = _get_credentials(options).get_session()
@@ -53,8 +56,6 @@ def download_feature(feature, path, options=None):
             with session.get(url, stream=True) as response:
                 if response.status_code != 200:
                     log.warning(f"Status code {response.status_code}, retrying..")
-                    attempts += 1
-                    time.sleep(60 * (1 + (random.random() / 4)))
                     continue
 
                 status.set_filesize(int(response.headers["Content-Length"]))
