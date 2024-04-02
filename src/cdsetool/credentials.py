@@ -62,11 +62,13 @@ class Credentials:  # pylint: disable=too-few-public-methods disable=too-many-in
     and Access Management (IAM) system
     """
 
+    RETRY_CODES = frozenset([413, 429, 500, 502, 503])
+
     RETRIES = Retry(
         total=5,
         backoff_factor=0.5,
         raise_on_status=False,
-        status_forcelist=Retry.RETRY_AFTER_STATUS_CODES,
+        status_forcelist=RETRY_CODES,
     )
 
     def __init__(
@@ -136,7 +138,7 @@ class Credentials:  # pylint: disable=too-few-public-methods disable=too-many-in
                 backoff_factor=0.5,
                 allowed_methods=None,
                 raise_on_status=False,
-                status_forcelist=Retry.RETRY_AFTER_STATUS_CODES,
+                status_forcelist=self.RETRY_CODES,
             ),
             proxies=self.__proxies,
         )
